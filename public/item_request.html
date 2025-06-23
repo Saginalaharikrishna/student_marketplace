@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Item Details | Student Marketplace</title>
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+    h1, h2 {
+      color: #0056d2;
+      margin-bottom: 20px;
+    }
+    .main-section {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .slider-container {
+      flex: 1;
+      min-width: 300px;
+      max-width: 600px;
+    }
+    .swiper-slide img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .swiper-button-next,
+    .swiper-button-prev {
+      color: #0056d2;
+    }
+    .details {
+      flex: 1;
+      min-width: 300px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .request-btn {
+      margin-top: 20px;
+      background: #0056d2;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .review-section {
+      background: white;
+      margin-top: 40px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .review {
+      margin-bottom: 15px;
+    }
+    .review strong {
+      color: #0056d2;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Item Details</h1>
+
+  <div class="main-section">
+    <!-- Image Slider -->
+    <div class="slider-container">
+      <div class="swiper">
+        <div class="swiper-wrapper" id="sliderWrapper"></div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+      </div>
+    </div>
+
+    <!-- Item Details -->
+    <div class="details">
+      <p><strong>Item Name:</strong> <span id="itemName"></span></p>
+      <p><strong>Description:</strong> <span id="itemDescription"></span></p>
+      <p><strong>Price:</strong> ₹<span id="itemPrice"></span></p>
+      <p><strong>Seller:</strong> <span id="sellerName"></span></p>
+      <p><strong>Seller Year:</strong> <span id="sellerYear"></span></p>
+      <button class="request-btn" onclick="sendRequest()">Send Request</button>
+    </div>
+  </div>
+
+  <!-- Review Section -->
+  <div class="review-section">
+    <h2>Seller Reviews</h2>
+    <div id="reviewsContainer"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  <script>
+    const params   = new URLSearchParams(window.location.search);
+    const itemId   = params.get("item_id");
+    const sellerId = params.get("seller_id");
+    const buyerId  = params.get("buyer_id");
+
+    async function loadItemDetails() {
+      // Fetch item, seller, images in parallel
+      const [itemRes, sellerRes, imageRes] = await Promise.all([
+        fetch(`/api/items/${itemId}`),
+        fetch(`/api/users/${sellerId}`),
+        fetch(`/api/items/${itemId}/images`)
+      ]);
+
+      if (!itemRes.ok || !sellerRes.ok || !imageRes.ok) {
+        alert("Error loading item or seller.");
+        return;
+      }
+
+      const item    = await itemRes.json();
+      const seller  = await sellerRes.json();
+      const images  = await imageRes.json();
+
+      // Populate details
+      document.getElementById("itemName").textContent        = item.name;
+      document.getElementById("itemDescription").textContent = item.description;
+      document.getElementById("itemPrice").textContent       = item.price;
+      document.getElementById("sellerName").textContent      = seller.name;
+      document.getElementById("sellerYear").textContent      = seller.year;
+
+      // Build slider
+      const wrapper = document.getElementById("sliderWrapper");
+      images.forEach(img => {
+        const slide = document.createElement("div");
+        slide.className = "swiper-slide";
+        slide.innerHTML = `<img src="${img.image_path}" alt="Item Image">`;
+        wrapper.appendChild(slide);
+      });
+      new Swiper(".swiper", {
+        pagination: { el: ".swiper-pagination" },
+        navigation: {
+          nextEl: ".swiper-button-next",
+          prevEl: ".swiper-button-prev"
+        },
+        loop: true
+      });
+
+      // Load reviews for this seller
+      await loadReviews();
+    }
+
+    async function loadReviews() {
+      const revRes = await fetch(`/api/reviews/seller/${sellerId}`);
+      const reviewsContainer = document.getElementById("reviewsContainer");
+
+      if (!revRes.ok) {
+        reviewsContainer.innerHTML = "<p>Failed to load reviews.</p>";
+        return;
+      }
+
+      const reviews = await revRes.json();
+      if (!reviews.length) {
+        reviewsContainer.innerHTML = "<p>No reviews yet.</p>";
+        return;
+      }
+
+      reviewsContainer.innerHTML = "";
+      reviews.forEach(r => {
+        const div = document.createElement("div");
+        div.className = "review";
+        div.innerHTML = `
+          <strong>${r.buyer_name} (${r.branch}, ${r.year} Yr)</strong>
+          <p>Rating: ${r.rating} ⭐</p>
+          <p>${r.comment}</p>
+        `;
+        reviewsContainer.appendChild(div);
+      });
+    }
+
+    async function sendRequest() {
+      try {
+        const response = await fetch('/api/requests', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ item_id: itemId, buyer_id: buyerId, seller_id: sellerId })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to send request');
+        alert("Request sent!");
+        window.location.href = "dashboard.html";
+      } catch (err) {
+        console.error("Error sending request:", err);
+        alert("Could not send request.");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadItemDetails);
+  </script>
+</body>
+</html>

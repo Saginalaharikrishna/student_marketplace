@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Settings | Student Marketplace</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f7fa;
+    }
+
+    header {
+      background: #0056d2;
+      padding: 20px 40px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .profile-img {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 20px;
+      border: 4px solid #e1e8f0;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      row-gap: 15px;
+      column-gap: 20px;
+      font-size: 16px;
+    }
+
+    .info-grid div {
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .label {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .value {
+      color: #444;
+    }
+
+    .edit-btn {
+      background-color: white;
+      border: 2px solid #fff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #0056d2;
+      font-weight: 600;
+    }
+
+    form {
+      margin-top: 30px;
+      display: none;
+    }
+
+    form input,
+    form select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    form label {
+      font-weight: 600;
+    }
+
+    .submit-btn {
+      background-color: #0056d2;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    👤 Settings
+    <button class="edit-btn" onclick="toggleEdit()">Edit Profile</button>
+  </header>
+
+  <div class="container">
+    <img id="profileImage" class="profile-img" src="" alt="Profile Image" />
+    <div class="info-grid" id="profileInfo">
+      <div class="label">Name:</div><div class="value" id="userName">Loading...</div>
+      <div class="label">Email:</div><div class="value" id="userEmail"></div>
+      <div class="label">Phone:</div><div class="value" id="userPhone"></div>
+      <div class="label">Branch:</div><div class="value" id="userBranch"></div>
+      <div class="label">Year:</div><div class="value" id="userYear"></div>
+      <div class="label">College:</div><div class="value" id="userCollege"></div>
+    </div>
+
+    <form id="editForm" enctype="multipart/form-data">
+      <input type="hidden" name="id" id="userId">
+      <label for="name">Name</label>
+      <input type="text" name="name" id="editName" required />
+
+      <label for="phone">Phone</label>
+      <input type="text" name="phone" id="editPhone" />
+
+      <label for="branch">Branch</label>
+      <input type="text" name="branch" id="editBranch" />
+
+      <label for="year">Year</label>
+      <input type="number" name="year" id="editYear" />
+
+      <label for="college">College</label>
+      <input type="text" name="college" id="editCollege" />
+
+      <label for="profile_pic">Profile Image</label>
+      <input type="file" name="profile_pic" accept="image/*" />
+
+      <button type="submit" class="submit-btn">Save Changes</button>
+    </form>
+  </div>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    async function fetchUserDetails() {
+      try {
+        const res = await fetch(`/api/settings/profile/${user.id}`);
+        const data = await res.json();
+
+        // Display values
+        document.getElementById("userId").value = data.id;
+        document.getElementById("userName").textContent = data.name;
+        document.getElementById("userEmail").textContent = data.email;
+        document.getElementById("userPhone").textContent = data.phone || "-";
+        document.getElementById("userBranch").textContent = data.branch || "-";
+        document.getElementById("userYear").textContent = data.year || "-";
+        document.getElementById("userCollege").textContent = data.college || "-";
+
+        // Load into form for editing
+        document.getElementById("editName").value = data.name;
+        document.getElementById("editPhone").value = data.phone || "";
+        document.getElementById("editBranch").value = data.branch || "";
+        document.getElementById("editYear").value = data.year || "";
+        document.getElementById("editCollege").value = data.college || "";
+
+        const imageUrl = data.profile_pic
+          ? data.profile_pic
+          : "https://randomuser.me/api/portraits/lego/1.jpg";
+
+        document.getElementById("profileImage").src = imageUrl;
+      } catch (err) {
+        console.error("Failed to load profile", err);
+        alert("Could not load user profile.");
+      }
+    }
+
+    function toggleEdit() {
+      document.getElementById("editForm").style.display = "block";
+      document.getElementById("profileInfo").style.display = "none";
+    }
+
+    document.getElementById("editForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const form = document.getElementById("editForm");
+      const formData = new FormData(form);
+
+      try {
+        const res = await fetch("/api/settings/profile/update", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          alert("Profile updated!");
+          window.location.reload();
+        } else {
+          throw new Error(result.error || "Update failed");
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Failed to update profile.");
+      }
+    });
+
+    document.addEventListener("DOMContentLoaded", fetchUserDetails);
+  </script>
+</body>
+</html>

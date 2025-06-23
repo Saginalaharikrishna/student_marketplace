@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse Items | Student Marketplace</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: #f2f5f9;
+      color: #333;
+    }
+
+    header {
+      background-color: #0056d2;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    nav a {
+      color: white;
+      margin-left: 20px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .container {
+      padding: 40px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .filters {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+
+    .filters select,
+    .filters input[type="text"] {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      width: 180px;
+    }
+
+    .items-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .item-card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      width: 260px;
+      text-align: center;
+    }
+
+    .item-card img {
+      max-width: 100%;
+      border-radius: 8px;
+      height: 160px;
+      object-fit: cover;
+      margin-bottom: 10px;
+    }
+
+    .item-card h3 {
+      font-size: 18px;
+      margin-bottom: 6px;
+      color: #0056d2;
+    }
+
+    .item-card p {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .contact-btn {
+      margin-top: 10px;
+      background-color: #0056d2;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+
+    .contact-btn:hover {
+      background-color: #003fa3;
+    }
+
+    footer {
+      padding: 20px;
+      text-align: center;
+      background-color: #f0f0f0;
+      color: #777;
+      font-size: 14px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Student Marketplace</h1>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="list_new_item.html">List Item</a>
+      
+      <a href="settings.html">Settings</a>
+      <a href="index.html" onclick="localStorage.clear()">Logout</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2 style="margin-bottom: 20px; color:#0056d2;">Browse Available Items</h2>
+
+    <div class="filters">
+      <input type="text" placeholder="Search by keyword" id="searchInput" />
+      <select id="branchFilter">
+        <option value="">Branch</option>
+        <option value="CSE">CSE</option>
+        <option value="ECE">ECE</option>
+        <option value="EEE">EEE</option>
+        <option value="MECH">MECH</option>
+      </select>
+      <select id="categoryFilter">
+        <option value="">Category</option>
+        <option value="book">Books</option>
+        <option value="electronics">Electronics</option>
+        <option value="accessory">Accessories</option>
+      </select>
+      <select id="typeFilter">
+        <option value="">Type</option>
+        <option value="Single">Single</option>
+        <option value="Combo">Combo</option>
+      </select>
+      <select id="modeFilter">
+        <option value="">Mode</option>
+        <option value="Donation">Donation</option>
+        <option value="Discounted">Discounted</option>
+      </select>
+    </div>
+
+    <div class="items-grid" id="itemsGrid">
+      <!-- Items will be inserted here dynamically -->
+    </div>
+  </div>
+
+  <footer>
+    © 2025 Student Marketplace. Browse and connect directly with peers.
+  </footer>
+
+  <script>
+    let allItems = [];
+
+    async function loadItems() {
+      try {
+        const res = await fetch('/api/items/available');
+        if (!res.ok) throw new Error('Failed to fetch available items');
+        let items = await res.json();
+        if (!Array.isArray(items)) throw new Error('Invalid response format');
+
+        for (let item of items) {
+          const imgRes = await fetch(`/api/items/${item.id}/images`);
+          const imgData = await imgRes.json();
+          item.image = imgData[0]?.image_path || 'https://via.placeholder.com/260x160';
+        }
+
+        allItems = items;
+        renderItems(items);
+      } catch (err) {
+        console.error('Error loading items:', err);
+        document.getElementById('itemsGrid').innerHTML = '<p>Failed to load items.</p>';
+      }
+    }
+
+    function renderItems(items) {
+      const grid = document.getElementById('itemsGrid');
+      grid.innerHTML = '';
+      if (items.length === 0) {
+        grid.innerHTML = '<p>No items found matching your criteria.</p>';
+        return;
+      }
+
+      for (const item of items) {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+          <img src="${item.image}" alt="Item Image" />
+          <h3>${item.name}</h3>
+          <p>Branch: ${item.branch} | Year: ${item.year} | ${item.mode === 'Donation' ? 'Donation' : '₹' + item.price}</p>
+         <button class="contact-btn" onclick="openItemPage(${item.id}, ${item.user_id})">Open</button>
+
+        `;
+        grid.appendChild(card);
+      }
+    }
+
+   function filterItems() {
+  const keyword = document.getElementById('searchInput').value.toLowerCase();
+  const branch = document.getElementById('branchFilter').value.toLowerCase();
+  const category = document.getElementById('categoryFilter').value.toLowerCase();
+  const type = document.getElementById('typeFilter').value.toLowerCase();
+  const mode = document.getElementById('modeFilter').value.toLowerCase();
+
+  const filtered = allItems.filter(item => {
+    return (!keyword || item.name.toLowerCase().includes(keyword)) &&
+           (!branch || item.branch.toLowerCase() === branch) &&
+           (!category || item.category.toLowerCase() === category) &&
+           (!type || item.type.toLowerCase() === type) &&
+           (!mode || item.mode.toLowerCase() === mode);
+  });
+
+  renderItems(filtered);
+}
+
+    function request(userId) {
+      window.open(`/contact.html?user_id=${userId}`, '_blank');
+    }
+
+    document.querySelectorAll('.filters input, .filters select').forEach(el => {
+      el.addEventListener('input', filterItems);
+    });
+
+
+
+
+    document.addEventListener('DOMContentLoaded', loadItems);
+
+
+    function openItemPage(itemId, sellerId) {
+  const buyer = JSON.parse(localStorage.getItem("user"));
+  if (!buyer) return alert("User not logged in");
+
+  const query = new URLSearchParams({
+    item_id: itemId,
+    seller_id: sellerId,
+    buyer_id: buyer.id
+  }).toString();
+
+  window.location.href = `item_request.html?${query}`;
+}
+
+  </script>
+</body>
+</html>

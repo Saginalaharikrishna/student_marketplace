@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>List New Item | Student Marketplace</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: #f2f5f9;
+      color: #333;
+    }
+
+    header {
+      background-color: #0056d2;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 24px;
+    }
+
+    nav a {
+      color: white;
+      margin-left: 20px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .form-container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .form-container h2 {
+      margin-bottom: 20px;
+      color: #0056d2;
+      text-align: center;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background-color: #0056d2;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .submit-btn:hover {
+      background-color: #003fa3;
+    }
+
+    footer {
+      padding: 20px;
+      text-align: center;
+      background-color: #f0f0f0;
+      color: #777;
+      font-size: 14px;
+      margin-top: 60px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Student Marketplace</h1>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      
+      <a href="settings.html">Settings</a>
+      <a href="index.html">Logout</a>
+    </nav>
+  </header>
+
+  <div class="form-container">
+    <h2>List a New Item</h2>
+       <form id="itemForm" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="itemName">Item Name</label>
+        <input type="text" id="itemName" name="itemName" required />
+      </div>
+
+      <div class="form-group">
+        <label for="category">Category</label>
+        <input type="text" id="category" name="category" required />
+      </div>
+
+      <div class="form-group">
+        <label for="branch">Branch</label>
+        <input type="text" id="branch" name="branch" required />
+      </div>
+
+      <div class="form-group">
+        <label for="year">Year</label>
+        <select id="year" name="year" required>
+          <option value="">Select Year</option>
+          <option value="1">1st Year</option>
+          <option value="2">2nd Year</option>
+          <option value="3">3rd Year</option>
+          <option value="4">4th Year</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="type">Item Type</label>
+        <select id="type" name="type" required>
+          <option value="Single">Single</option>
+          <option value="Combo">Combo</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="mode">Sale Type</label>
+        <select id="mode" name="mode" required>
+          <option value="Donation">Donation</option>
+          <option value="Discounted">Discounted Sale</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="price">Price (if Discounted)</label>
+        <input type="number" id="price" name="price" min="0" />
+      </div>
+
+      <div class="form-group">
+        <label for="image">Upload Image</label>
+       <input type="file" id="images" name="images" accept="image/*" multiple required />
+      <small>Upload 3–6 images</small>
+
+      </div>
+
+      <button type="submit" class="submit-btn">Submit Listing</button>
+    </form>
+  </div>
+
+  <footer>
+    © 2025 Student Marketplace. List your items and help others.
+  </footer>
+</body>
+
+<script>
+
+
+document.querySelector("form").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const images = document.getElementById("images").files;
+  if (images.length < 3 || images.length > 6) {
+    alert("Please upload between 3 and 6 images.");
+    return;
+  }
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  if (!user || !user.id) {
+    alert("User not logged in.");
+    return;
+  }
+
+  const form = e.target;
+  const formData = new FormData(form);
+  formData.append("user_id", user.id);
+
+  try {
+    const response = await fetch('/api/items/list', {
+      method: "POST",
+      body: formData
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      alert("Item listed successfully!");
+      window.location.href = "dashboard.html";
+    } else {
+      alert(result.message || "Error listing item.");
+    }
+  } catch (err) {
+    console.error("Error:", err);
+    alert("Server error while listing item.");
+  }
+});
+
+
+
+
+
+
+
+  
+</script>
+
+</html>

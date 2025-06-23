@@ -1,0 +1,79 @@
+<!-- my_item_requested.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Items Requested</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f2f5f9; padding: 20px; }
+    h2 { color: #0056d2; margin-bottom: 20px; }
+    .card {
+      background: white; border-radius: 10px; padding: 20px;
+      margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .card img { max-width: 120px; border-radius: 8px; float: left; margin-right: 15px; }
+    .card h3 { margin-top: 0; }
+    .card p { margin: 5px 0; }
+    .actions button {
+      margin-top: 10px; padding: 8px 14px;
+      border: none; border-radius: 6px; cursor: pointer;
+      background: #0056d2; color: white;
+    }
+  </style>
+</head>
+<body>
+  <h2>My Items That Were Requested</h2>
+  <div id="requestList"></div>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    const list = document.getElementById("requestList");
+
+    async function fetchRequests() {
+      const res = await fetch(`/api/requests/seller/${user.id}`);
+      const data = await res.json();
+      if (!data.length) return (list.innerHTML = "<p>No requests yet.</p>");
+
+      list.innerHTML = '';
+      data.forEach(req => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `
+          <img src="${req.image || '/placeholder.png'}" alt="Item image" />
+          <h3>${req.item_name}</h3>
+          <p><strong>Price:</strong> ₹${req.price}</p>
+          <p><strong>Buyer:</strong> ${req.buyer_name}</p>
+          <p><strong>Status:</strong> ${req.status}</p>
+          ${req.status !== 'accepted' ? `
+            <div class="actions">
+              <button onclick="acceptRequest(${req.request_id})">Accept</button>
+            </div>` : ''}
+        `;
+
+        if (req.status === 'accepted') {
+  div.innerHTML += `
+    <p><strong>Buyer Contact:</strong> ${req.buyer_phone}</p>
+    <p style="color:green">Please contact the buyer via the above phone number to finalize the deal.</p>
+  `;
+}
+
+        list.appendChild(div);
+
+
+      });
+    }
+
+    async function acceptRequest(id) {
+      await fetch(`/api/requests/${id}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: "accepted" })
+      });
+      fetchRequests();
+    }
+
+    document.addEventListener("DOMContentLoaded", fetchRequests);
+  </script>
+</body>
+</html>
