@@ -1,4 +1,3 @@
-<!-- requested_by_me.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,39 +5,187 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Requested By Me | Student Marketplace</title>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f2f9fc; padding: 20px; }
-    h2, h3 { color: #0056d2; margin-bottom: 10px; }
+     * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f2f9fc;
+     
+    }
+
+    header {
+      background-color: #0056d2;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    header h1 {
+      font-size: 22px;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+    }
+
+    nav a {
+      color: white;
+      margin-left: 20px;
+      text-decoration: none;
+      font-weight: bold;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #cce3ff;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background-color: #cce3ff;
+      transition: width 0.3s ease;
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    h2, h3 {
+      
+      color: #0056d2;
+      margin-top: 40px;
+      margin-bottom: 10px;
+    }
+
     .card {
-      background: white; border-radius: 10px; padding: 20px;
-      margin-bottom: 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+       
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       overflow: hidden;
+      display: flex;
+      gap: 15px;
+      
     }
-    .card img { max-width: 120px; border-radius: 8px; float: left; margin-right: 15px; }
-    .card h3 { margin-top: 0; }
-    .card p { margin: 5px 0; clear: both; }
+
+    .card img {
+      width: 120px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .card-content {
+      flex: 1;
+    }
+
+    .card-content h3 {
+      margin-top: 0;
+      margin-bottom: 6px;
+    }
+
+    .card-content p {
+      margin: 5px 0;
+    }
+
     .actions button {
-      margin-right: 10px; padding: 8px 14px;
-      border: none; border-radius: 6px; cursor: pointer;
+      margin-right: 10px;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
     }
-    .cancel-btn { background: #ccc; }
-    .buyed-btn { background: #28a745; color: white; }
-    .review-form { margin-top: 15px; background: #eef6ff; padding: 10px; border-radius: 6px; }
-    .review-form textarea { width: 100%; height: 60px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; padding: 6px; }
-    .review-form select { margin-top: 5px; }
-    .review-form button { margin-top: 8px; padding: 6px 12px; background: #0056d2; color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+    .cancel-btn {
+      background: #ccc;
+    }
+
+    .buyed-btn {
+      background: #28a745;
+      color: white;
+    }
+
+    .review-form {
+      margin-top: 15px;
+      background: #eef6ff;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    .review-form textarea {
+      width: 100%;
+      height: 60px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      padding: 6px;
+    }
+
+    .review-form select {
+      margin-top: 5px;
+      padding: 5px;
+    }
+
+    .review-form button {
+      margin-top: 8px;
+      padding: 6px 12px;
+      background: #0056d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .section-group {
+      margin-top: 30px;
+    }
   </style>
 </head>
 <body>
-  <h2>Items Requested By Me</h2>
+  <header>
+    <h1>Student Marketplace</h1>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="browse.html">Browse</a>
+      <a href="list_new_item.html">List Item</a>
+      <a href="settings.html">Settings</a>
+      <a href="index.html" onclick="localStorage.clear()">Logout</a>
+    </nav>
+  </header>
 
-  <h3>Pending Requests</h3>
-  <div id="pendingList"></div>
 
-  <h3>Accepted Requests</h3>
-  <div id="acceptedList"></div>
+  <div class="section-group">
+    <h3>Pending Requests</h3>
+    <div id="pendingList"></div>
+  </div>
 
-  <h3>Completed Requests</h3>
-  <div id="completedList"></div>
+  <div class="section-group">
+    <h3>Accepted Requests</h3>
+    <div id="acceptedList"></div>
+  </div>
+
+  <div class="section-group">
+    <h3>Completed Requests</h3>
+    <div id="completedList"></div>
+  </div>
 
   <script>
     const user = JSON.parse(localStorage.getItem('user'));
@@ -54,46 +201,46 @@
         return;
       }
 
-      // clear all lists
       pendingList.innerHTML = acceptedList.innerHTML = completedList.innerHTML = '';
 
       data.forEach(req => {
         const div = document.createElement("div");
         div.className = "card";
 
-        // common content
-        div.innerHTML = `
-          <img src="${req.image || '/placeholder.png'}" alt="Item image" />
-          <h3>${req.item_name}</h3>
-          <p><strong>Price:</strong> ₹${req.price}</p>
-          <p><strong>Seller:</strong> ${req.seller_name}</p>
-          <p><strong>Status:</strong> ${req.status}</p>
+        const image = `<img src="${req.image || '/placeholder.png'}" alt="Item image" />`;
+        let content = `
+          <div class="card-content">
+            <h3>${req.item_name}</h3>
+            <p><strong>Price:</strong> ₹${req.price}</p>
+            <p><strong>Seller:</strong> ${req.seller_name}</p>
+            <p><strong>Status:</strong> ${req.status}</p>
         `;
 
         if (req.status === 'pending') {
-          // only Cancel
-          div.innerHTML += `
+          content += `
             <div class="actions">
               <button class="cancel-btn" onclick="cancelRequest(${req.request_id})">Cancel</button>
             </div>
           `;
+          content += `</div>`;
+          div.innerHTML = image + content;
           pendingList.appendChild(div);
         }
         else if (req.status === 'accepted') {
-          // show contact + "Buyed" button
-          div.innerHTML += `
+          content += `
             <p><strong>Seller Contact:</strong> ${req.seller_phone}</p>
             <div class="actions">
               <button class="buyed-btn" onclick="markBuyed(${req.request_id})">Mark as Buyed</button>
             </div>
           `;
+          content += `</div>`;
+          div.innerHTML = image + content;
           acceptedList.appendChild(div);
         }
         else if (req.status === 'completed') {
-          // show contact + review section or note
-          div.innerHTML += `<p><strong>Seller Contact:</strong> ${req.seller_phone}</p>`;
+          content += `<p><strong>Seller Contact:</strong> ${req.seller_phone}</p>`;
           if (!req.has_review) {
-            div.innerHTML += `
+            content += `
               <div class="review-form">
                 <h4>Leave a Review</h4>
                 <label>Rating:
@@ -115,8 +262,10 @@
                 )">Submit Review</button>
               </div>`;
           } else {
-            div.innerHTML += `<p><em>You have already reviewed this purchase.</em></p>`;
+            content += `<p><em>You have already reviewed this purchase.</em></p>`;
           }
+          content += `</div>`;
+          div.innerHTML = image + content;
           completedList.appendChild(div);
         }
       });

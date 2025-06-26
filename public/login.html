@@ -5,48 +5,92 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Student Marketplace</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
       background-color: #f7f9fc;
       color: #333;
+    }
+
+    header {
+      background-color: #0056d2;
+      color: white;
+      padding: 20px 40px;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    header h1 {
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    nav a {
+      display: inline-block;
+      background-color: transparent;
+      color: white;
+      border: 2px solid white;
+      padding: 8px 16px;
+      margin-left: 15px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    nav a:hover {
+      background-color: white;
+      color: #0056d2;
     }
 
     .login-container {
       background-color: white;
-      padding: 30px 40px;
+      padding: 40px;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      max-width: 400px;
-      width: 100%;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      max-width: 420px;
+      width: 90%;
+      margin: 60px auto;
     }
 
     h2 {
       text-align: center;
       color: #0056d2;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
+      font-size: 28px;
     }
 
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
     form label {
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       font-weight: bold;
+      color: #444;
     }
 
     form input {
       width: 100%;
-      padding: 10px;
-      border-radius: 6px;
+      padding: 12px;
+      border-radius: 8px;
       border: 1px solid #ccc;
-      font-size: 14px;
+      font-size: 15px;
+      transition: border-color 0.2s ease;
+    }
+
+    form input:focus {
+      outline: none;
+      border-color: #0056d2;
+      box-shadow: 0 0 5px rgba(0, 86, 210, 0.2);
     }
 
     .btn-login {
@@ -57,30 +101,61 @@
       border: none;
       border-radius: 8px;
       font-size: 16px;
+      font-weight: 600;
       cursor: pointer;
-      margin-top: 20px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
     .btn-login:hover {
       background-color: #0042a8;
+      transform: scale(1.02);
     }
 
     .register-link {
       text-align: center;
-      margin-top: 15px;
+      margin-top: 20px;
+      font-size: 14px;
     }
 
     .register-link a {
       color: #0056d2;
       text-decoration: none;
+      font-weight: 500;
     }
 
     .register-link a:hover {
       text-decoration: underline;
     }
+
+    .forgot-password {
+      color: red;
+      display: block;
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 30px 20px;
+      }
+    }
   </style>
 </head>
 <body>
+
+  <header>
+    <h1>Student Marketplace</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="register.html">Register</a>
+    </nav>
+  </header>
+
   <div class="login-container">
     <h2>Student Login</h2>
     <form id="loginForm">
@@ -98,6 +173,7 @@
 
       <div class="register-link">
         Don't have an account? <a href="register.html">Register here</a>
+        <a href="passwordreset.html" class="forgot-password">Forgot Password?</a>
       </div>
     </form>
   </div>
@@ -122,7 +198,7 @@
 
         if (res.ok) {
           alert('Login successful!');
-         localStorage.setItem("user", JSON.stringify({ id: result.id, name: result.name }));
+          localStorage.setItem("user", JSON.stringify({ id: result.id, name: result.name }));
 
           document.getElementById('loginForm').reset();
           window.location.href = 'dashboard.html';

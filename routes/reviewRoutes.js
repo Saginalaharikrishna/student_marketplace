@@ -38,4 +38,31 @@ router.get('/seller/:sellerId', async (req, res) => {
   }
 });
 
+
+
+
+router.get('/average/:sellerId', async (req, res) => {
+  const { sellerId } = req.params;
+
+  try {
+    const [rows] = await db.execute(
+      `SELECT AVG(rating) AS avgRating, COUNT(*) AS totalReviews
+       FROM reviews WHERE seller_id = ?`,
+      [sellerId]
+    );
+
+    const avg = rows[0].avgRating;
+    const count = rows[0].totalReviews;
+
+    res.json({
+      average: avg ? Number(avg).toFixed(2) : 0,
+      totalReviews: count || 0
+    });
+  } catch (err) {
+    console.error('Error fetching average rating:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
 module.exports = router;

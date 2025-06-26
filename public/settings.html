@@ -1,26 +1,96 @@
 <!DOCTYPE html>
-<html lang="="en">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Settings | Student Marketplace</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    body {
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
       font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
       background-color: #f5f7fa;
+      color: #333;
     }
 
     header {
-      background: #0056d2;
+      background-color: #0056d2;
+      color: white;
       padding: 20px 40px;
-      color: #fff;
-      font-size: 24px;
-      font-weight: bold;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     }
+
+    header h1 {
+      font-size: 24px;
+    }
+
+    nav a {
+      color: white;
+      margin-left: 20px;
+      text-decoration: none;
+      font-weight: bold;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #cce3ff;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background-color: #cce3ff;
+      transition: width 0.3s ease;
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+    }
+
+    .edit-btn {
+      background-color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #0056d2;
+      font-weight: 600;
+      margin-left: 20px;
+      transition: background-color 0.3s ease;
+    }
+
+    .edit-btn:hover {
+      background-color: #cce3ff;
+    }
+
+    .setting {
+  
+  color: #0047ab;
+  font-size: 28px;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  font-weight: 600;
+   font-family: 'Segoe UI', sans-serif;
+}
 
     .container {
       max-width: 800px;
@@ -63,17 +133,6 @@
       color: #444;
     }
 
-    .edit-btn {
-      background-color: white;
-      border: 2px solid #fff;
-      padding: 8px 18px;
-      border-radius: 20px;
-      font-size: 14px;
-      cursor: pointer;
-      color: #0056d2;
-      font-weight: 600;
-    }
-
     form {
       margin-top: 30px;
       display: none;
@@ -87,10 +146,13 @@
       margin-bottom: 16px;
       border: 1px solid #ccc;
       border-radius: 6px;
+      font-size: 15px;
     }
 
     form label {
       font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
     }
 
     .submit-btn {
@@ -102,15 +164,30 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
+    .submit-btn:hover {
+      background-color: #003fa3;
+    }
   </style>
 </head>
 <body>
   <header>
-    👤 Settings
-    <button class="edit-btn" onclick="toggleEdit()">Edit Profile</button>
+    <h1>Student Marketplace</h1>
+    <div class="header-right">
+      <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="browse.html">Browse</a>
+        <a href="list_new_item.html">List Item</a>
+        <a href="index.html" onclick="localStorage.clear()">Logout</a>
+      </nav>
+      <button class="edit-btn" onclick="toggleEdit()">Edit Profile</button>
+    </div>
   </header>
 
+ 
+
   <div class="container">
+    
     <img id="profileImage" class="profile-img" src="" alt="Profile Image" />
     <div class="info-grid" id="profileInfo">
       <div class="label">Name:</div><div class="value" id="userName">Loading...</div>
@@ -153,7 +230,6 @@
         const res = await fetch(`/api/settings/profile/${user.id}`);
         const data = await res.json();
 
-        // Display values
         document.getElementById("userId").value = data.id;
         document.getElementById("userName").textContent = data.name;
         document.getElementById("userEmail").textContent = data.email;
@@ -162,7 +238,6 @@
         document.getElementById("userYear").textContent = data.year || "-";
         document.getElementById("userCollege").textContent = data.college || "-";
 
-        // Load into form for editing
         document.getElementById("editName").value = data.name;
         document.getElementById("editPhone").value = data.phone || "";
         document.getElementById("editBranch").value = data.branch || "";

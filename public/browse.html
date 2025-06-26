@@ -13,7 +13,7 @@
     }
 
     body {
-      background: #f2f5f9;
+      background: #eef3fa;
       color: #333;
     }
 
@@ -24,6 +24,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 24px;
     }
 
     nav a {
@@ -31,10 +36,31 @@
       margin-left: 20px;
       text-decoration: none;
       font-weight: bold;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #cce3ff;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background-color: #cce3ff;
+      transition: width 0.3s ease;
+    }
+
+    nav a:hover::after {
+      width: 100%;
     }
 
     .container {
-      padding: 40px;
+      padding: 40px 20px;
       max-width: 1200px;
       margin: auto;
     }
@@ -48,26 +74,38 @@
 
     .filters select,
     .filters input[type="text"] {
-      padding: 10px;
+      padding: 12px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      font-size: 14px;
+      font-size: 15px;
       width: 180px;
+      background-color: white;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .filters select:focus,
+    .filters input[type="text"]:focus {
+      outline: none;
+      box-shadow: 0 0 5px rgba(0, 86, 210, 0.3);
     }
 
     .items-grid {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
       gap: 20px;
     }
 
     .item-card {
       background-color: white;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
       padding: 20px;
-      width: 260px;
-      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .item-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
     }
 
     .item-card img {
@@ -75,18 +113,19 @@
       border-radius: 8px;
       height: 160px;
       object-fit: cover;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .item-card h3 {
       font-size: 18px;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       color: #0056d2;
     }
 
     .item-card p {
       font-size: 14px;
       color: #666;
+      margin-bottom: 10px;
     }
 
     .contact-btn {
@@ -95,14 +134,14 @@
       color: white;
       padding: 10px 16px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 14px;
-      transition: 0.3s;
+      transition: background-color 0.3s;
     }
 
     .contact-btn:hover {
-      background-color: #003fa3;
+      background-color: #0040aa;
     }
 
     footer {

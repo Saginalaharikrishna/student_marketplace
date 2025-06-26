@@ -1,10 +1,10 @@
-// routes/authRoutes.js
 const express = require('express');
 const router = express.Router();
-const db = require('../config/db'); // your DB connection
+const db = require('../config/db');
 const bcrypt = require('bcrypt');
+const sendMail = require('../utils/nodemailer'); // You'll create this
 
-// Register route
+//-------------------------------------------------- Register route ----------------------------------------------------------
 router.post('/register', async (req, res) => {
   const { name, email, phone, password, confirmPassword, branch, year, college } = req.body;
 
@@ -22,7 +22,6 @@ router.post('/register', async (req, res) => {
       INSERT INTO users (name, email, phone, password, branch, year, college)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-
     await db.execute(sql, [name, email, phone, hashedPassword, branch, year, college]);
 
     res.status(201).json({ message: 'User registered successfully!' });
@@ -36,10 +35,7 @@ router.post('/register', async (req, res) => {
 });
 
 
-
-
-
-//-------------------------------------------------- Login route----------------------------------------------------------
+//-------------------------------------------------- Login route ----------------------------------------------------------
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
@@ -58,7 +54,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ message: 'Incorrect password.' });
     }
 
-     res.status(200).json({ message: 'Login successful', id: user.id, name: user.name });
+    res.status(200).json({ message: 'Login successful', id: user.id, name: user.name });
 
   } catch (error) {
     console.error('Login Error:', error);
@@ -67,7 +63,67 @@ router.post('/login', async (req, res) => {
 });
 
 
+//-------------------------------------------------- Send OTP route ----------------------------------------------------------
+router.post('/send-otp', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const [rows] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
+    if (rows.length === 0) {
+      return res.json({ success: false, message: "Email not registered." });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await db.execute('INSERT INTO otp_verification (email, otp) VALUES (?, ?)', [email, otp]);
+
+    await sendMail(email, otp); // sends email using nodemailer
+    res.json({ success: true, message: "OTP sent to your email." });
+
+  } catch (err) {
+    console.error('Send OTP Error:', err);
+    res.status(500).json({ success: false, message: "Failed to send OTP." });
+  }
+});
 
 
+//-------------------------------------------------- Verify OTP route ----------------------------------------------------------
+router.post('/verify-otp', async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const [rows] = await db.execute(`
+      SELECT * FROM otp_verification
+      WHERE email = ? AND otp = ? AND created_at >= NOW() - INTERVAL 10 MINUTE
+    `, [email, otp]);
+
+    if (rows.length === 0) {
+      return res.json({ success: false, message: "Invalid or expired OTP." });
+    }
+
+    res.json({ success: true, message: "OTP verified successfully." });
+  } catch (err) {
+    console.error('Verify OTP Error:', err);
+    res.status(500).json({ success: false, message: "Error verifying OTP." });
+  }
+});
+
+
+//-------------------------------------------------- Update Password route ----------------------------------------------------------
+router.post('/update-password', async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  try {
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await db.execute('UPDATE users SET password = ? WHERE email = ?', [hashed, email]);
+    await db.execute('DELETE FROM otp_verification WHERE email = ?', [email]);
+
+    res.json({ success: true, message: "Password updated successfully." });
+
+  } catch (err) {
+    console.error('Update Password Error:', err);
+    res.status(500).json({ success: false, message: "Error updating password." });
+  }
+});
 
 module.exports = router;
