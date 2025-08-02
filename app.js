@@ -13,41 +13,35 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Static files
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));   // serve /public/ pages
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(__dirname));  // ✅ serve root files like /index.html
 
-// ✅ Register backend routes BEFORE 404 handler
+// Backend routes
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
 
-// adding new item route
 const itemRoutes = require('./routes/itemRoutes');
 app.use('/api/items', itemRoutes);
-
 
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/users', userRoutes);
 
-
 const requestRoutes = require('./routes/requestRoutes');
 app.use('/api/requests', requestRoutes);
-
 
 const reviewRoutes = require('./routes/reviewRoutes');
 app.use('/api/reviews', reviewRoutes);
 
-
 const settingsRoutes = require('./routes/settingsRoutes');
 app.use('/api/settings', settingsRoutes);
 
-
-
-// Serve homepage
+// Homepage route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// ❌ Now this catches unmatched routes
+// 404 handler
 app.use((req, res, next) => {
   res.status(404).json({ error: 'Route not found' });
 });
